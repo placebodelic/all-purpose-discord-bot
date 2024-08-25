@@ -6,18 +6,15 @@ from dotenv import load_dotenv
 import sqlite3
 from datetime import datetime, timedelta
 
-# Load environment variables
+
 load_dotenv()
 
-# Set up Discord bot
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Set up OpenAI client
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-# Set up SQLite database
 conn = sqlite3.connect('conversation_history.db')
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS messages
@@ -29,7 +26,6 @@ async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
 def get_conversation_history(user_id):
-    # Get messages from the last 24 hours
     one_day_ago = datetime.now() - timedelta(days=1)
     c.execute("SELECT content, role FROM messages WHERE user_id = ? AND timestamp > ? ORDER BY timestamp ASC",
               (user_id, one_day_ago))
@@ -72,8 +68,7 @@ async def clear_history(ctx):
     c.execute("DELETE FROM messages WHERE user_id = ?", (ctx.author.id,))
     conn.commit()
     await ctx.send("your conversation history has been cleared.")
-
-# Run the bot
+  
 discord_token = os.getenv('DISCORD_TOKEN')
 if discord_token is None:
     raise ValueError("DISCORD_TOKEN environment variable is not set")
